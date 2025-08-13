@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -132,6 +132,10 @@ export default function DosaCafe() {
   const [paymentMethod, setPaymentMethod] = useState("cod")
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  let startX = 0;
+  let endX = 0;
 
   const nextDosa = () => {
     setCurrentDosaIndex((prev) => (prev + 1) % dosaVarieties.length)
@@ -140,6 +144,23 @@ export default function DosaCafe() {
   const prevDosa = () => {
     setCurrentDosaIndex((prev) => (prev - 1 + dosaVarieties.length) % dosaVarieties.length)
   }
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    startX = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    endX = e.changedTouches[0].clientX;
+    const diffX = startX - endX;
+
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0) {
+        prevDosa();
+      } else {
+        nextDosa();
+      }
+    }
+  };
 
   const getVisibleDosas = () => {
     const visible = []
@@ -288,7 +309,7 @@ export default function DosaCafe() {
   }
 
   const removeTopping = (uniqueId: number) => {
-    setSelectedToppings((prev) => prev.filter((t) => t.uniqueId !== uniqueId))
+    setSelectedToppings((prev) => prev.filter((t) => t.id !== uniqueId))
   }
 
   const addToCartWithToppings = () => {
@@ -299,6 +320,7 @@ export default function DosaCafe() {
 
   const addToCartSimple = () => {
     addToCart(currentDosa, [])
+    alert("added")
   }
 
   return (
@@ -357,7 +379,7 @@ export default function DosaCafe() {
             <Button
               variant="outline"
               size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 border-orange-300 hover:bg-orange-50 shadow-lg"
+              className="absolute left-4 top-[45%] -translate-y-1/2 z-21 bg-white/90 border-orange-300 hover:bg-orange-50 shadow-lg"
               onClick={prevDosa}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -366,34 +388,37 @@ export default function DosaCafe() {
             <Button
               variant="outline"
               size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 border-orange-300 hover:bg-orange-50 shadow-lg"
+              className="absolute right-4 top-[45%] -translate-y-1/2 z-21 bg-white/90 border-orange-300 hover:bg-orange-50 shadow-lg"
               onClick={nextDosa}
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
 
             {/* Slider Track */}
-            <div className="flex items-center justify-center gap-4 py-8 overflow-hidden">
+            <div
+              className="flex items-center justify-center gap-4 py-8 overflow-hidden"
+              ref={sliderRef}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               {getVisibleDosas().map((dosa, index) => (
                 <div
                   key={`${dosa.id}-${index}`}
-                  className={`transition-all duration-500 ease-in-out ${
-                    dosa.isCenter
-                      ? "scale-110 z-20"
-                      : Math.abs(dosa.position) === 1
-                        ? "scale-90 opacity-70"
-                        : "scale-75 opacity-40"
-                  }`}
+                  className={`transition-all duration-500 ease-in-out ${dosa.isCenter
+                    ? "scale-110 z-20"
+                    : Math.abs(dosa.position) === 1
+                      ? "scale-90 opacity-70"
+                      : "scale-75 opacity-40"
+                    }`}
                   style={{
                     transform: `translateX(${dosa.position * 20}px)`,
                   }}
                 >
                   <Card
-                    className={`w-80 overflow-hidden transition-all duration-300 ${
-                      dosa.isCenter
-                        ? "shadow-2xl border-2 border-orange-300 bg-white"
-                        : "shadow-md border-orange-200 hover:shadow-lg"
-                    }`}
+                    className={`w-80 overflow-hidden transition-all duration-300 ${dosa.isCenter
+                      ? "shadow-2xl border-2 border-orange-300 bg-white"
+                      : "shadow-md border-orange-200 hover:shadow-lg"
+                      }`}
                   >
                     <div className="aspect-video overflow-hidden">
                       <img
@@ -418,7 +443,7 @@ export default function DosaCafe() {
                         <div className="space-y-3">
                           {/* Updated add to cart handler */}
                           <Button
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3"
+                            className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-600 text-white font-semibold py-3"
                             onClick={addToCartSimple}
                           >
                             <Plus className="w-4 h-4 mr-2" />
@@ -456,9 +481,8 @@ export default function DosaCafe() {
               {dosaVarieties.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentDosaIndex ? "bg-orange-500 scale-125" : "bg-orange-200 hover:bg-orange-300"
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentDosaIndex ? "bg-orange-500 scale-125" : "bg-orange-200 hover:bg-orange-300"
+                    }`}
                   onClick={() => setCurrentDosaIndex(index)}
                 />
               ))}
@@ -867,7 +891,7 @@ export default function DosaCafe() {
                   {/* Dropped Toppings */}
                   {selectedToppings.map((topping) => (
                     <div
-                      key={topping.uniqueId}
+                      key={topping.id}
                       className="absolute w-8 h-8 rounded-full border-2 border-white shadow-md cursor-pointer hover:scale-110 transition-transform group"
                       style={{
                         left: `${topping.x}%`,
@@ -875,7 +899,7 @@ export default function DosaCafe() {
                         backgroundColor: availableToppings.find((t) => t.id === topping.id)?.color,
                         transform: "translate(-50%, -50%)",
                       }}
-                      onClick={() => removeTopping(topping.uniqueId)}
+                      onClick={() => removeTopping(topping.id)}
                     >
                       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         {topping.name} - Click to remove
@@ -922,7 +946,7 @@ export default function DosaCafe() {
                   <h4 className="font-semibold text-gray-900 mb-2">Selected Toppings:</h4>
                   <div className="space-y-1">
                     {selectedToppings.map((topping) => (
-                      <div key={topping.uniqueId} className="flex justify-between items-center text-sm">
+                      <div key={topping.id} className="flex justify-between items-center text-sm">
                         <span>{topping.name}</span>
                         <div className="flex items-center gap-2">
                           <span>₹{topping.price}</span>
@@ -930,7 +954,7 @@ export default function DosaCafe() {
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 hover:bg-red-100"
-                            onClick={() => removeTopping(topping.uniqueId)}
+                            onClick={() => removeTopping(topping.id)}
                           >
                             <X className="w-3 h-3" />
                           </Button>
