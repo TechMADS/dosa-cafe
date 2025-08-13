@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://youtube.com'),
   title: 'Dosa Cafe – Authentic & Delicious South Indian Dosas in Pondicherry',
   description:
     'Visit Dosa Cafe in Pondicherry for authentic South Indian dosas – crispy, fluffy, and full of flavor. From masala dosa to special varieties, every bite is made fresh with traditional recipes.',
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     title: 'Dosa Cafe – Your Destination for Authentic South Indian Dosas',
     description:
       'Enjoy the taste of tradition at Dosa Cafe in Pondicherry. Freshly made, authentic South Indian dosas – from crispy masala dosa to specialty varieties.',
-    url: 'https://yourwebsite.com', // Change to your actual website URL
+    url: 'https://youtube.com', // Change to your actual website URL
     siteName: 'Dosa Cafe',
     images: [
       {
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
       }
     ],
     locale: 'en_IN',
-    type: 'restaurant'
+    type: 'website'
   },
 
   // Twitter Card
