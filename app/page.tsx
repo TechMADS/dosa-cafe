@@ -26,6 +26,7 @@ import {
   Banknote,
   CheckCircle,
   Clock,
+  MessageCircle,
 } from "lucide-react"
 
 // Enhanced cart item interface to store detailed information
@@ -134,6 +135,37 @@ export default function DosaCafe() {
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackName, setFeedbackName] = useState("")
+  const [feedbackMsg, setFeedbackMsg] = useState("")
+
+  const [searchText, setSearchText] = useState("")
+
+  const whatsappNumber = "916382619604"
+
+  const handleFeedbackSubmit = () => {
+    const text = `Feedback from ${feedbackName || "Anonymous"}:\n${feedbackMsg}`
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`
+    window.open(url, "_blank")
+    setShowFeedback(false)
+    setFeedbackName("")
+    setFeedbackMsg("")
+  }
+
+  const emailId = "dineshg1729@gmail.com"
+
+  const handleFeedbackSubmitMail = () => {
+    const subject = `Feedback from ${feedbackName || "Anonymous"}`;
+    const body = `${feedbackMsg}`;
+    const mailtoLink = `mailto:${emailId}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+
+    setShowFeedback(false);
+    setFeedbackName("");
+    setFeedbackMsg("");
+  };
+
   let startX = 0;
   let endX = 0;
 
@@ -163,17 +195,34 @@ export default function DosaCafe() {
   };
 
   const getVisibleDosas = () => {
+    let filtered = dosaVarieties.filter(dosa =>
+      dosa.name.toLowerCase().includes(searchText.toLowerCase())
+    )
+    if (filtered.length === 0) filtered = dosaVarieties
     const visible = []
     for (let i = -2; i <= 2; i++) {
-      const index = (currentDosaIndex + i + dosaVarieties.length) % dosaVarieties.length
+      const index = (currentDosaIndex + i + filtered.length) % filtered.length
       visible.push({
-        ...dosaVarieties[index],
+        ...filtered[index],
         position: i,
         isCenter: i === 0,
       })
     }
     return visible
   }
+
+  // const getVisibleDosas = () => {
+  //   const visible = []
+  //   for (let i = -2; i <= 2; i++) {
+  //     const index = (currentDosaIndex + i + dosaVarieties.length) % dosaVarieties.length
+  //     visible.push({
+  //       ...dosaVarieties[index],
+  //       position: i,
+  //       isCenter: i === 0,
+  //     })
+  //   }
+  //   return visible
+  // }
 
   const currentDosa = dosaVarieties[currentDosaIndex]
   const toppingsPrice = selectedToppings.reduce((sum, topping) => sum + topping.price, 0)
@@ -339,6 +388,17 @@ export default function DosaCafe() {
               </div>
             </div>
 
+            {/* Search Bar */}
+            <div className="flex justify-center mb-4 mt-4">
+              <Input
+                type="text"
+                placeholder="Search dosa..."
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
+                className="w-full max-w-md border-orange-300 focus:border-orange-500"
+              />
+            </div>
+
             {/* Enhanced cart button with click handler */}
             <Button
               variant="outline"
@@ -490,6 +550,67 @@ export default function DosaCafe() {
           </div>
         </div>
       </section>
+
+      {/* Floating Feedback Button */}
+      <button
+        className="fixed bottom-8 right-8 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg p-4 flex items-center gap-2 transition-all"
+        onClick={() => setShowFeedback(true)}
+        aria-label="Send Feedback"
+      >
+        <MessageCircle className="w-6 h-6" />
+        <span className="font-semibold hidden sm:inline">Feedback</span>
+      </button>
+
+      {/* Feedback Modal */}
+      <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Send Feedback
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <Label htmlFor="feedback-name">Your Name *</Label>
+              <Input
+                id="feedback-name"
+                value={feedbackName}
+                onChange={e => setFeedbackName(e.target.value)}
+                placeholder="Enter your name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="feedback-msg">Your Feedback *</Label>
+              <Textarea
+                id="feedback-msg"
+                value={feedbackMsg}
+                onChange={e => setFeedbackMsg(e.target.value)}
+                placeholder="Type your feedback here"
+                rows={4}
+              />
+            </div>
+            <div
+              className="w-full flex justify-between p-4"
+            >
+              <Button
+                className="w-[47%] bg-green-500 hover:bg-green-600 text-white"
+                onClick={handleFeedbackSubmit}
+                disabled={!feedbackMsg.trim() || !feedbackName.trim()}
+              >
+                Send via WhatsApp
+              </Button>
+              <Button
+                className="w-[47%] bg-green-500 hover:bg-green-600 text-white"
+                onClick={handleFeedbackSubmitMail}
+                disabled={!feedbackMsg.trim() || !feedbackName.trim()}
+              >
+                Send via Mail
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Shopping Cart Modal with detailed billing */}
       <Dialog open={showCart} onOpenChange={setShowCart}>
@@ -986,11 +1107,106 @@ export default function DosaCafe() {
         </DialogContent>
       </Dialog>
 
-      {/* Footer */}
+      {/* Footer
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h4 className="text-xl font-semibold mb-2">Dosa Cafe</h4>
           <p className="text-gray-400">Serving authentic South Indian cuisine since 2020</p>
+        </div>
+      </footer> */}
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-10 mt-16" aria-label="Site Footer">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-8">
+            {/* Brand & Description */}
+            <div className="text-center md:text-left">
+              <h4 className="text-2xl font-bold mb-2 tracking-wide text-orange-400">Dosa Cafe</h4>
+              <p className="text-gray-300 mb-3">
+                <span className="font-semibold">Serving authentic South Indian cuisine since 2020.</span>
+                <br />
+                Freshly made dosas, chutneys, and sambar delivered to your doorstep in <span className="text-orange-200">Tirunelveli</span>.
+              </p>
+              <div className="flex justify-center md:justify-start gap-3 mt-2">
+                <a
+                  href="https://wa.me/916382619604"
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="WhatsApp"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-green-500 hover:bg-green-600 transition"
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.17 1.6 5.98L0 24l6.27-1.64A11.93 11.93 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.19-1.24-6.19-3.48-8.52zM12 22c-1.85 0-3.68-.5-5.27-1.44l-.38-.22-3.73.98.99-3.63-.24-.37A9.94 9.94 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zm5.2-7.6c-.28-.14-1.65-.81-1.9-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.43-2.25-1.37-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.34.42-.51.14-.17.18-.29.28-.48.09-.19.05-.36-.02-.5-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.62-.47-.16-.01-.36-.01-.56-.01-.19 0-.5.07-.76.34-.26.27-1 1-.99 2.43.01 1.43 1.03 2.81 1.17 3 .14.19 2.03 3.1 4.93 4.22.69.27 1.23.43 1.65.55.69.22 1.32.19 1.82.12.56-.08 1.65-.67 1.89-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.19-.53-.33z" /></svg>
+                </a>
+                <a
+                  href="mailto:dineshg1729@gmail.com"
+                  aria-label="Email"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-500 hover:bg-blue-600 transition"
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path d="M12 13.065L2.4 6.6V18h19.2V6.6l-9.6 6.465zm9.6-10.065H2.4C1.08 3 0 4.08 0 5.4v13.2C0 19.92 1.08 21 2.4 21h19.2c1.32 0 2.4-1.08 2.4-2.4V5.4c0-1.32-1.08-2.4-2.4-2.4zm0 2.4v.511l-9.6 6.489-9.6-6.489V5.4h19.2z" /></svg>
+                </a>
+                <a
+                  href="https://www.instagram.com/"
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Instagram"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 transition"
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.515 2.567 5.782 2.295 7.148 2.233 8.414 2.175 8.794 2.163 12 2.163zm0-2.163C8.736 0 8.332.012 7.052.07 5.771.127 4.635.385 3.678 1.342 2.721 2.299 2.463 3.435 2.406 4.716 2.348 5.996 2.336 6.4 2.336 12s.012 6.004.07 7.284c.057 1.281.315 2.417 1.272 3.374.957.957 2.093 1.215 3.374 1.272C8.332 23.988 8.736 24 12 24s3.668-.012 4.948-.07c1.281-.057 2.417-.315 3.374-1.272.957-.957 1.215-2.093 1.272-3.374.058-1.28.07-1.684.07-7.284s-.012-6.004-.07-7.284c-.057-1.281-.315-2.417-1.272-3.374C19.365.385 18.229.127 16.948.07 15.668.012 15.264 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z" /></svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <nav className="text-center md:text-left">
+              <h5 className="font-semibold text-orange-300 mb-2">Quick Links</h5>
+              <ul className="space-y-1 text-gray-300">
+                <li>
+                  <a href="/" className="hover:text-orange-400 transition">Home</a>
+                </li>
+                <li>
+                  <a href="#menu" className="hover:text-orange-400 transition">Menu</a>
+                </li>
+                <li>
+                  <a href="#order" className="hover:text-orange-400 transition">Order Online</a>
+                </li>
+                <li>
+                  <a href="#contact" className="hover:text-orange-400 transition">Contact</a>
+                </li>
+              </ul>
+            </nav>
+
+            {/* Contact & Address */}
+            <div className="text-center md:text-left">
+              <h5 className="font-semibold text-orange-300 mb-2">Contact Us</h5>
+              <address className="not-italic text-gray-300 mb-2">
+                123, Main Road, Tirunelveli, Tamil Nadu, India<br />
+                <a href="tel:+919876543210" className="hover:text-orange-400 transition block">+91 98765 43210</a>
+                <a href="mailto:dineshg1729@gmail.com" className="hover:text-orange-400 transition block">dineshg1729@gmail.com</a>
+              </address>
+              <div className="flex justify-center md:justify-start gap-2">
+                <span className="text-xs text-gray-400">Open: 8am - 10pm | All Days</span>
+              </div>
+            </div>
+          </div>
+
+          {/* SEO & Legal */}
+          <div className="border-t border-orange-800 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 gap-2">
+            <div>
+              &copy; {new Date().getFullYear()} Dosa Cafe. All rights reserved.
+              <span className="mx-2">|</span>
+              <a href="/privacy-policy" className="hover:text-orange-300">Privacy Policy</a>
+              <span className="mx-2">|</span>
+              <a href="/terms" className="hover:text-orange-300">Terms of Service</a>
+            </div>
+            <div>
+              <span itemScope itemType="https://schema.org/Restaurant">
+                <meta itemProp="name" content="Dosa Cafe" />
+                <meta itemProp="address" content="123, Main Road, Tirunelveli, Tamil Nadu, India" />
+                <meta itemProp="telephone" content="+919876543210" />
+                <meta itemProp="servesCuisine" content="South Indian" />
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
