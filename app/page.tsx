@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
@@ -375,12 +376,14 @@ export default function DosaCafe() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       {/* Header */}
-      <header className="bg-white shadow-md border-b-2 border-orange-200">
+      <header className="bg-white shadow-md border-b-2 border-orange-200 sticky top-0 left-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 gap-3">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">D</span>
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  <Image src="/image.png" alt="Dosa Cafe" width={40} height={40} />
+                </span>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Dosa Cafe</h1>
@@ -405,8 +408,8 @@ export default function DosaCafe() {
               className="relative border-orange-300 hover:bg-orange-50 bg-transparent"
               onClick={() => setShowCart(true)}
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Cart
+              <ShoppingCart className="w-5 h-5 m-0 md:mr-2" />
+              <span className="hidden md:inline">Cart</span>
               {getCartItemsCount() > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white">{getCartItemsCount()}</Badge>
               )}
@@ -416,8 +419,21 @@ export default function DosaCafe() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-4 px-4 opacity-90 h-[100vh]">
+
+        <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden mt-15">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="/bgvideo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div className="max-w-4xl mx-auto h-screen flex flex-col justify-center items-center text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Crispy, Golden, <span className="text-orange-600">Delicious</span>
           </h2>
@@ -426,7 +442,10 @@ export default function DosaCafe() {
             and sambar
           </p>
         </div>
+
       </section>
+
+
 
       {/* Interactive Dosa Slider */}
       <section className="py-16 px-4">
@@ -465,7 +484,7 @@ export default function DosaCafe() {
                 <div
                   key={`${dosa.id}-${index}`}
                   className={`transition-all duration-500 ease-in-out ${dosa.isCenter
-                    ? "scale-110 z-20"
+                    ? "scale-110 z-10"
                     : Math.abs(dosa.position) === 1
                       ? "scale-90 opacity-70"
                       : "scale-75 opacity-40"
