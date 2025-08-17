@@ -142,6 +142,8 @@ export default function DosaCafe() {
 
   const [searchText, setSearchText] = useState("")
 
+
+  // Feedback functions
   const whatsappNumber = "916382619604"
 
   const handleFeedbackSubmit = () => {
@@ -167,6 +169,8 @@ export default function DosaCafe() {
     setFeedbackMsg("");
   };
 
+
+  // Dosa swiper for mobile screen
   let startX = 0;
   let endX = 0;
 
@@ -195,6 +199,8 @@ export default function DosaCafe() {
     }
   };
 
+
+  // Visible Dosa with Search method...
   const getVisibleDosas = () => {
     let filtered = dosaVarieties.filter(dosa =>
       dosa.name.toLowerCase().includes(searchText.toLowerCase())
@@ -225,24 +231,61 @@ export default function DosaCafe() {
   //   return visible
   // }
 
+
+  // Cart Functions
   const currentDosa = dosaVarieties[currentDosaIndex]
   const toppingsPrice = selectedToppings.reduce((sum, topping) => sum + topping.price, 0)
   const totalPrice = currentDosa.basePrice + toppingsPrice
 
   // Enhanced cart functions to handle detailed cart items
   const addToCart = (dosa: any, toppings: any[] = []) => {
-    const cartItem: CartItem = {
-      id: Date.now().toString() + Math.random(),
-      dosaId: dosa.id,
-      dosaName: dosa.name,
-      basePrice: dosa.basePrice,
-      toppings: toppings.map((t) => ({ id: t.id, name: t.name, price: t.price })),
-      quantity: 1,
-      totalPrice: dosa.basePrice + toppings.reduce((sum, t) => sum + t.price, 0),
-    }
+    setCart((prev) => {
+      // Check if item with same dosa + toppings already exists
+      const existingItemIndex = prev.findIndex(
+        (item) =>
+          item.dosaId === dosa.id &&
+          JSON.stringify(item.toppings) === JSON.stringify(toppings.map((t) => ({ id: t.id, name: t.name, price: t.price })))
+      )
 
-    setCart((prev) => [...prev, cartItem])
+      if (existingItemIndex !== -1) {
+        // If exists → update quantity & total price
+        const updatedCart = [...prev]
+        const existingItem = updatedCart[existingItemIndex]
+        updatedCart[existingItemIndex] = {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        }
+        return updatedCart
+      } else {
+        // Otherwise → create new item
+        const cartItem: CartItem = {
+          id: Date.now().toString() + Math.random(),
+          dosaId: dosa.id,
+          dosaName: dosa.name,
+          basePrice: dosa.basePrice,
+          toppings: toppings.map((t) => ({ id: t.id, name: t.name, price: t.price })),
+          quantity: 1,
+          totalPrice: dosa.basePrice + toppings.reduce((sum, t) => sum + t.price, 0),
+        }
+        return [...prev, cartItem]
+      }
+    })
   }
+
+
+  // const addToCart = (dosa: any, toppings: any[] = []) => {
+  //   const cartItem: CartItem = {
+  //     id: Date.now().toString() + Math.random(),
+  //     dosaId: dosa.id,
+  //     dosaName: dosa.name,
+  //     basePrice: dosa.basePrice,
+  //     toppings: toppings.map((t) => ({ id: t.id, name: t.name, price: t.price })),
+  //     quantity: 1,
+  //     totalPrice: dosa.basePrice + toppings.reduce((sum, t) => sum + t.price, 0),
+  //   }
+
+  //   setCart((prev) => [...prev, cartItem])
+  // }
 
   const updateCartItemQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -322,6 +365,7 @@ export default function DosaCafe() {
     )
   }
 
+  // Drag and drop functions
   const handleDragStart = (e: React.DragEvent, topping: any) => {
     setDraggedTopping(topping)
     e.dataTransfer.effectAllowed = "copy"
@@ -370,7 +414,6 @@ export default function DosaCafe() {
 
   const addToCartSimple = () => {
     addToCart(currentDosa, [])
-    alert("added")
   }
 
   return (
@@ -526,7 +569,10 @@ export default function DosaCafe() {
                             onClick={addToCartSimple}
                           >
                             <Plus className="w-4 h-4 mr-2" />
-                            Add to Cart - ₹{dosa.basePrice}
+                            Add to Cart - ₹{dosa.basePrice} {(() => {
+                              const cartItem = cart.find((c) => c.dosaId === currentDosa.id);
+                              return cartItem && cartItem.quantity > 0 ? `Added (${cartItem.quantity})` : "";
+                            })()}
                           </Button>
                           <Button
                             variant="outline"
@@ -1032,11 +1078,15 @@ export default function DosaCafe() {
                   {selectedToppings.map((topping) => (
                     <div
                       key={topping.id}
-                      className="absolute w-8 h-8 rounded-full border-2 border-white shadow-md cursor-pointer hover:scale-110 transition-transform group"
+                      className="absolute w-20 h-20 rounded-full border-2 border-white shadow-md cursor-pointer hover:scale-110 transition-transform group"
                       style={{
                         left: `${topping.x}%`,
                         top: `${topping.y}%`,
-                        backgroundColor: availableToppings.find((t) => t.id === topping.id)?.color,
+                        // backgroundColor: availableToppings.find((t) => t.id === topping.id)?.color,
+                        backgroundImage: `url(${availableToppings.find((t) => t.id === topping.id)?.image})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
                         transform: "translate(-50%, -50%)",
                       }}
                       onClick={() => removeTopping(topping.id)}
@@ -1063,10 +1113,20 @@ export default function DosaCafe() {
                   <Card
                     key={topping.id}
                     className="cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-orange-200"
+                    style={{ backgroundColor: topping.color }}
                     draggable
                     onDragStart={(e) => handleDragStart(e, topping)}
                   >
-                    <CardContent className="p-4 text-center">
+                    <CardContent
+                      className="p-4 text-center"
+                      style={{
+                        backgroundImage: `url(${topping.image})`,
+                        backgroundSize: "cover",     // or "contain"
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        width: "100%",
+                        height: "100%",
+                      }}>
                       <div
                         className="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-gray-300"
                         style={{ backgroundColor: topping.color }}
