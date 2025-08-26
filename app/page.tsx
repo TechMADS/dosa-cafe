@@ -181,8 +181,8 @@ const dosaVarieties = [
 const availableToppings = [
   { id: 1, name: "Extra Cheese", price: 20, color: "#FFD700", image: "/melted-cheese.png" },
   { id: 2, name: " Chicken", price: 40, color: "#F5F5DC", image: "/paneer-cubes.png" },
-  { id: 3, name: "Onion", price: 10, color: "#8B4513", image: "/sliced-mushrooms.png" },
-  { id: 4, name: "Pepper", price: 10, color: "#DDA0DD", image: "/sliced-onions.png" },
+  { id: 3, name: "Pepper", price: 10, color: "#8B4513", image: "/sliced-mushrooms.png" },
+  { id: 4, name: "Onion", price: 10, color: "#DDA0DD", image: "/sliced-onions.png" },
   { id: 5, name: "Ghee", price: 20, color: "#FF6347", image: "/diced-tomatoes.png" },
   { id: 6, name: "Podi", price: 10, color: "#32CD32", image: "/green-chilies.png" },
   { id: 7, name: "Podimass", price: 20, color: "#228B22", image: "/fresh-coriander.png" },
